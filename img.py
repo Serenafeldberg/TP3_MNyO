@@ -27,8 +27,23 @@ print("flattened_data shape", flattened_data.shape)
 # Perform singular value decomposition
 U, s, Vt = np.linalg.svd(flattened_data)
 
-first_10_dimensions = U[:, :10]
-last_10_dimensions = U[:, -10:]
+print("U shape", U.shape)
+print("s shape", s.shape)
+print("Vt shape", Vt.shape)
+
+first_10_U = U[:, :10]
+first_10_s = np.diag(s[:10])
+first_10_Vt = Vt[:10, :]
+
+# Reconstruct the first image using the first 10 components
+reconstructed_image = first_10_U @ first_10_s @ first_10_Vt
+print("reconstructed_image shape", reconstructed_image.shape)
+plt.imshow(reconstructed_image, cmap='gray')
+#plt.show()
+
+last_10_U = U[:, -10:]
+last_10_s = np.diag(s[-10:])
+last_10_Vt = Vt[-10:, :]
 
 # plt.imshow(first_10_dimensions, cmap='gray')
 # plt.title('First 10 Dimensions (Eigenvectors)')
@@ -71,10 +86,10 @@ image_to_compress = data[0]
 U, s, Vt = np.linalg.svd(image_to_compress)
 
 Sd = np.diag(s)
-k  = 120
+k  = 10
 comprimida = U[:,:k] @ Sd[0:k,:k] @ Vt[:k,:]
 plt.imshow(comprimida, cmap='gray')
-plt.show()
+#plt.show()
 
 # Definir el porcentaje máximo de error permitido (en este caso, 5%)
 max_error_percentage = 0.05
