@@ -3,8 +3,6 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import StandardScaler
 
 def data ():
     data = []
@@ -32,123 +30,103 @@ def dec_svd (data, d):
     return reconstructed_data
 
 def Kmeans (data, k):
-    kmeans = KMeans(n_clusters=k, random_state=0).fit(data)
 
+    kmeans = KMeans(n_clusters=k, random_state=0, n_init=10).fit(data)
     labels = kmeans.labels_
-
     centroids = kmeans.cluster_centers_
 
     return labels, centroids
 
-def dbscan (data):
 
-    debscan = DBSCAN ()
-
-    cluster = debscan.fit(data)
-    labels = cluster.labels_
-
-    return labels
-
-def plot_clusters (data, label, title, bool, cen):
-    plt.figure()
-    plt.scatter(data[:, 0], data[:, 1], c=label)
-    plt.title(title)
-    plt.xlabel('x1')
-    plt.ylabel('x2')
-    if bool:
-        plt.scatter(cen[0], cen[1], c='red', marker='x')
-    plt.show()
-
-def centroid (data, labels):
-    unique_labels = np.unique(labels)
-    centroids = []
-    for label in unique_labels:
-        if label == -1:  # Ignorar puntos de ruido
-            continue
-        cluster_points = data[labels == label]
-        centroid = np.mean(cluster_points, axis=0)
-        centroids.append(centroid)
-
-    return np.array(centroids)
 
 def euclidean_distance(x1, x2, sigma=0.5):
     return np.linalg.norm(x1 - x2)
-    return np.exp(-((np.linalg.norm(x1 - x2))**2)/(2 * (sigma**2)) )
+#   return np.exp(-((np.linalg.norm(x1 - x2))**2)/(2 * (sigma**2)) )
 
-def get_neighbors(data, point_idx, eps):
+def get_neighbors(data, centroid, eps):
+
     neighbors = []
+
     for idx, point in enumerate(data):
-        if euclidean_distance(data[point_idx], point) <= eps:
+
+        if euclidean_distance(centroid, point) <= eps:
             neighbors.append(idx)
+
     return neighbors
 
-def clusttering(data, eps, min_samples):
-    labels = np.zeros(len(data))
-    cluster_label = 0
+
+def find_cluster(neighbours1, neighbours2, data):
 
     for idx, point in enumerate(data):
-        if labels[idx] != 0:
-            continue
-        
-        neighbors = get_neighbors(data, idx, eps)
-        
-        if len(neighbors) < min_samples:
-            labels[idx] = -1  # Etiqueta como ruido
-        else:
-            cluster_label += 1
-            labels[idx] = cluster_label
+
+        minimum_distance_1 = euclidean_distance(data[idx], data[neighbours1[0]])
+        minimum_distance_2 = euclidean_distance(data[idx], data[neighbours2[0]])
+
+        for neighbours_index in neighbours1:
+            compare = euclidean_distance(data[idx], data[neighbours_index])
+            if (compare < minimum_distance_1):
+                minimum_distance_1 = compare
+
+    
+        for neighbours_index in neighbours2:
+            compare = euclidean_distance(data[idx], data[neighbours_index])
+            if (compare < minimum_distance_2):
+                minimum_distance_2 = compare
             
-            # Expandir el cluster
-            for neighbor_idx in neighbors:
-                if labels[neighbor_idx] == -1:
-                    labels[neighbor_idx] = cluster_label
-                elif labels[neighbor_idx] == 0:
-                    labels[neighbor_idx] = cluster_label
-                    neighbor_neighbors = get_neighbors(data, neighbor_idx, eps)
-                    if len(neighbor_neighbors) >= min_samples:
-                        neighbors.extend(neighbor_neighbors)
-    
-    return labels
+        
+        if minimum_distance_2 > minimum_distance_1:
+            neighbours1.append(idx)
+        else:
+            neighbours2.append(idx)
 
-def find_centroids(data, eps, min_samples):
-    centroids = []
-    visited = np.zeros(len(data), dtype=bool)
+
+def get_label(neighbours1, neighbours2, data, bool, cen):
+
+    x1 = []
+    y1 = []
+    x2 = []
+    y2 = []
+
+    for idx in neighbours1:
+        x1.append(data[idx][0])
+        y1.append(data[idx][1])
+
+    for idx in neighbours2:
+        x2.append(data[idx][0])
+        y2.append(data[idx][1])
+
     
-    for idx, point in enumerate(data):
-        if visited[idx]:
-            continue
-        
-        neighbors = []
-        for neighbor_idx, neighbor in enumerate(data):
-            if not visited[neighbor_idx] and euclidean_distance(point, neighbor) <= eps:
-                neighbors.append(neighbor_idx)
-        
-        if len(neighbors) >= min_samples:
-            centroid = np.mean(data[neighbors], axis=0)
-            centroids.append(centroid)
-            visited[neighbors] = True
-    
-    return centroids
+    plt.figure()
+    plt.scatter(x1, y1, color='red', label = "Primer cluster")
+    plt.scatter(x2, y2, color='blue', label = "Segundo cluster")
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title("Centroides y Clusters")
+
+    if bool:
+        plt.scatter(cen[:, 0], cen[:, 1], c='yellow', marker='x', label = "Centroides")
+
+    plt.legend()
+    plt.show()
+
 
 
 if __name__ == "__main__":
-    data = data()
-    reconstructed_data = dec_svd(data, 2)
 
-    # label = dbscan(reconstructed_data)
-    # centroids = centroid(reconstructed_data, label)
-    # plot_clusters(reconstructed_data, label, 'DBSCAN', True, centroids)
+    data_ = data()
+    reconstructed_data = dec_svd(data_, 2)
 
-    # k = len(set(label)) - (1 if -1 in label else 0)
-    # label2, cen = Kmeans(reconstructed_data, 2)
+    label2, cen = Kmeans(reconstructed_data, 2)
 
-    # plot_clusters(reconstructed_data, label2, 'K means', True, cen)
 
-    label = clusttering(reconstructed_data, 0.5, 5)
+    neighbours1 = get_neighbors(reconstructed_data, cen[0], 2)
+    neighbours2 = get_neighbors(reconstructed_data, cen[1], 2)
 
-    cen = find_centroids(reconstructed_data, 0.5, 5)
+    find_cluster(neighbours1, neighbours2, reconstructed_data)
+    get_label(neighbours1, neighbours2, reconstructed_data, True, cen)
 
-    plot_clusters(reconstructed_data, label, 'DBSCAN', True, cen)
+
+
 
 
 
