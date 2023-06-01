@@ -63,6 +63,10 @@ for i, ax in enumerate(axs.flatten()):
 plt.show()
 
 
+print("First 10 singular values:", s[:10])
+print("Last 10 singular values:", s[-10:])
+
+
 
 image_to_compress = data[0]
 
