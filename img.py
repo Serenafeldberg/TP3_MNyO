@@ -40,7 +40,7 @@ first_10_Vt = Vt[:10, :]
 # Reconstruct the first image using the first 10 components
 reconstructed_image = first_10_U @ first_10_s @ first_10_Vt
 
-fig, axs = plt.subplots (2, 5, figsize=(10, 4))
+fig, axs = plt.subplots (2, 8, figsize=(10, 4))
 fig.suptitle('First 10 dimensions', fontsize=16)
 
 for i, ax in enumerate(axs.flatten()):
@@ -54,7 +54,7 @@ last_10_Vt = Vt[-10:, :]
 
 reconstructed_image = last_10_U @ last_10_s @ last_10_Vt
 
-fig, axs = plt.subplots (2, 5, figsize=(10, 4))
+fig, axs = plt.subplots (2, 8, figsize=(10, 4))
 fig.suptitle('Last 10 dimensions', fontsize=16)
 
 for i, ax in enumerate(axs.flatten()):
