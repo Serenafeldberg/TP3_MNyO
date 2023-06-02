@@ -62,6 +62,14 @@ for i, ax in enumerate(axs.flatten()):
     ax.axis('off')
 plt.show()
 
+fig, axs = plt.subplots (1, 2)
+fig.suptitle ("Comp between first and last 10 dimensions", fontsize=16)
+
+axs[0].imshow(first_10_U, cmap = 'gray')
+axs[1].imshow(last_10_U, cmap = 'gray')
+
+plt.show()
+
 
 print("First 10 singular values:", s[:10])
 print("Last 10 singular values:", s[-10:])
