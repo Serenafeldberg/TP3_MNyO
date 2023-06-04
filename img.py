@@ -64,30 +64,32 @@ plt.show()
 
 
 
-image_to_compress = data[0]
 
-U, s, Vt = np.linalg.svd(image_to_compress)
+for i in range (16):
+    image_to_compress = data[i]
 
-Sd = np.diag(s)
-k  = 100
-comprimida = U[:,:k] @ Sd[0:k,:k] @ Vt[:k,:]
-plt.imshow(comprimida, cmap='gray')
-plt.show()
+    U, s, Vt = np.linalg.svd(image_to_compress)
 
-# Definir el porcentaje máximo de error permitido (en este caso, 5%)
-max_error_percentage = 0.05
+    Sd = np.diag(s)
+    k  = 100
+    comprimida = U[:,:k] @ Sd[0:k,:k] @ Vt[:k,:]
+    plt.imshow(comprimida, cmap='gray')
+    plt.show()
 
-# Inicializar el número mínimo de dimensiones requeridas
-min_dimensions = 1
+    # Definir el porcentaje máximo de error permitido (en este caso, 5%)
+    max_error_percentage = 0.05
 
-# Calcular el error inicial
-reconstructed_image = U[:, :min_dimensions] @ np.diag(s[:min_dimensions]) @ Vt[:min_dimensions, :]
-error = np.linalg.norm(image_to_compress - reconstructed_image, ord='fro') / np.linalg.norm(image_to_compress, ord='fro')
+    # Inicializar el número mínimo de dimensiones requeridas
+    min_dimensions = 1
 
-# Incrementar el número de dimensiones hasta que se cumpla el error máximo
-while error > max_error_percentage:
-    min_dimensions += 1
+    # Calcular el error inicial
     reconstructed_image = U[:, :min_dimensions] @ np.diag(s[:min_dimensions]) @ Vt[:min_dimensions, :]
     error = np.linalg.norm(image_to_compress - reconstructed_image, ord='fro') / np.linalg.norm(image_to_compress, ord='fro')
 
-print("Número mínimo de dimensiones requeridas:", min_dimensions)
+    # Incrementar el número de dimensiones hasta que se cumpla el error máximo
+    while error > max_error_percentage:
+        min_dimensions += 1
+        reconstructed_image = U[:, :min_dimensions] @ np.diag(s[:min_dimensions]) @ Vt[:min_dimensions, :]
+        error = np.linalg.norm(image_to_compress - reconstructed_image, ord='fro') / np.linalg.norm(image_to_compress, ord='fro')
+
+    print(f"Número mínimo de dimensiones requeridas p/ img {i}:", min_dimensions)
